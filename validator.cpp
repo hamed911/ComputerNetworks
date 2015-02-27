@@ -33,6 +33,15 @@ void set_compn_data(char* path_name, company* this_company);
 int create_directories(char path_name[MAX_STR_SIZE])
 {
 	int mkdir_status = mkdir(path_name, S_IRUSR | S_IWUSR | S_IXUSR | S_IROTH | S_IWOTH | S_IXOTH);
+	char vfpath[MAX_STR_SIZE];
+	clear_buff(vfpath, MAX_STR_SIZE);
+	strcpy(vfpath, path_name);
+	strcat(vfpath, "/validators.txt");
+	int vfile_fd = creat(vfpath, O_RDWR | O_APPEND);
+	write(vfile_fd, "hello", sizeof("hello"));
+	close(vfile_fd);
+	//if(vfile_fd<0)
+		//vfile_fd = creat(vfpath, O_RDWR | O_APPEND);
 	char path_name_cmp[MAX_STR_SIZE], path_name_cst[MAX_STR_SIZE];
 	clear_buff(path_name_cmp, MAX_STR_SIZE);
 	clear_buff(path_name_cst, MAX_STR_SIZE);
@@ -44,8 +53,8 @@ int create_directories(char path_name[MAX_STR_SIZE])
 	mkdir_status = mkdir(path_name_cst, S_IRUSR | S_IWUSR | S_IXUSR| S_IROTH | S_IWOTH | S_IXOTH);
 	return 0;
 }
-
-/*void set_compn_data(char* path_name, company* this_company)
+/*
+void set_compn_data(char* path_name, company* this_company)
 {
 	int op_fd = open(path_name, O_RDWR | O_APPEND);
 	if(op_fd < 0) write(STDOUTFD, "Error In Opening File to Read Data!\n", sizeof("Error In Opening File to Read Data!\n"));
