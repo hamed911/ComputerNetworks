@@ -67,7 +67,7 @@ int main(int argn, char** args){
 			//sending identity to server			
 			char iden_buff[MAX_STR_SIZE];
                         clear_buff(iden_buff, MAX_STR_SIZE);
-                        strcat(iden_buff, "customer ");
+                        strcat(iden_buff, "voter ");
                         strcat(iden_buff, args[1]);
                         strcat(iden_buff, " \0");
 			

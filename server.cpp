@@ -61,7 +61,7 @@ int main(int argn, char** args){
 			char iden_buff[MAX_STR_SIZE];
 			clear_buff(iden_buff, MAX_STR_SIZE);
 			
-			strcat(iden_buff, "company ");
+			strcat(iden_buff, "server ");
 			strcat(iden_buff, args[1]);
 			strcat(iden_buff, " \0");
 
