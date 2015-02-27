@@ -33,6 +33,7 @@ void set_compn_data(char* path_name, company* this_company);
 int create_directories(char path_name[MAX_STR_SIZE])
 {
 	int mkdir_status = mkdir(path_name, S_IRUSR | S_IWUSR | S_IXUSR | S_IROTH | S_IWOTH | S_IXOTH);
+<<<<<<< HEAD
 	char vfpath[MAX_STR_SIZE];
 	clear_buff(vfpath, MAX_STR_SIZE);
 	strcpy(vfpath, path_name);
@@ -42,6 +43,8 @@ int create_directories(char path_name[MAX_STR_SIZE])
 	close(vfile_fd);
 	//if(vfile_fd<0)
 		//vfile_fd = creat(vfpath, O_RDWR | O_APPEND);
+=======
+>>>>>>> 8718a338529e6b6d795ed048c0cf02be752f3318
 	char path_name_cmp[MAX_STR_SIZE], path_name_cst[MAX_STR_SIZE];
 	clear_buff(path_name_cmp, MAX_STR_SIZE);
 	clear_buff(path_name_cst, MAX_STR_SIZE);
@@ -53,8 +56,13 @@ int create_directories(char path_name[MAX_STR_SIZE])
 	mkdir_status = mkdir(path_name_cst, S_IRUSR | S_IWUSR | S_IXUSR| S_IROTH | S_IWOTH | S_IXOTH);
 	return 0;
 }
+<<<<<<< HEAD
 /*
 void set_compn_data(char* path_name, company* this_company)
+=======
+
+/*void set_compn_data(char* path_name, company* this_company)
+>>>>>>> 8718a338529e6b6d795ed048c0cf02be752f3318
 {
 	int op_fd = open(path_name, O_RDWR | O_APPEND);
 	if(op_fd < 0) write(STDOUTFD, "Error In Opening File to Read Data!\n", sizeof("Error In Opening File to Read Data!\n"));
