@@ -3,18 +3,20 @@
 #include <netinet/in.h>
 #include "utilities.h"
 
-void test_connection(char input [MAX_STR_SIZE])
-{
-        strcpy(input, "Connect 127.0.0.1 1235\n");
-}
-
 int main(int argn, char** args){
 
 	if(argn != 3){
-		char argErr[]  = "Valid format is:\n./Customer Customer_name main_budget\n";
+		char argErr[]  = "Valid format is:\n./client voter_name ssn\n";
 		write(STDOUTFD, argErr, strlen(argErr));
 		return 0;
 	}
+	//show CA available ports
+	write(STDOUTFD, "These are available port(s) to connect to CAs\n", sizeof("These are available port(s) to connect to CAs\n"));
+	//read available ports
+	vector<string> avail_ports = read_available_ports();
+	for(int i=0; i<avail_ports.size(); i++)
+		cout<<avail_ports[i]<<endl;
+
 	char sugst[] = "\nThese are the valid commands:\n\n";
 	char comm[][MAX_STR_SIZE] = 
 	{ "Connect\t\t->\tConnect to Server\n"

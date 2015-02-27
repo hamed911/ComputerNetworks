@@ -1,5 +1,27 @@
 #include "utilities.h"
 
+vector<string> read_available_ports()
+{
+	int open_fd = open("./DB/validators.txt", O_RDONLY);
+	if(open_fd < 0)
+		write(STDOUTFD, "can't open available ports file", sizeof("can't open available ports file"));
+	char read_buff[MAX_STR_SIZE];
+	clear_buff(read_buff, MAX_STR_SIZE);
+	int r_st = read(open_fd, read_buff, MAX_STR_SIZE-1);
+	vector<string> ports = mytokenizer(read_buff, "\n");
+	return ports;
+}
+
+int found_in(string str, vector<string> arr)
+{
+	for(int i=0; i<arr.size(); i++)
+	{
+		if(str == arr[i])
+			return i;
+	}
+	return -1;
+}
+
 /*int strlength(char str[MAX_STR_SIZE])
 {
 	int i;

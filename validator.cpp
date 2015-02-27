@@ -87,14 +87,16 @@ int main(int argn, char** args)
 		return 0;
 	}
 	int port_number = atoi(args[1]);
-	int fd_to_save_port = open("./DB/validators.txt", O_APPEND | O_RDWR);
-	cerr<<"args[1] is: "<<args[1]<< " in " <<strlen(args[1])<<endl;
-	int dumm = write(fd_to_save_port, args[1], strlen(args[1]));
-	dumm = write(fd_to_save_port, "\n", strlen("\n"));
-	if(dumm <0)
-		write(STDOUTFD, "Error while writing port\n", sizeof("Error while writing port\n")); 
-	close(fd_to_save_port);
-	
+	if(found_in(args[1], read_available_ports()) < 0)
+	{
+		int fd_to_save_port = open("./DB/validators.txt", O_APPEND | O_RDWR);
+		cerr<<"args[1] is: "<<args[1]<< " in " <<strlen(args[1])<<endl;
+		int dumm = write(fd_to_save_port, args[1], strlen(args[1]));
+		dumm = write(fd_to_save_port, "\n", strlen("\n"));
+		if(dumm <0)
+				write(STDOUTFD, "Error while writing port\n", sizeof("Error while writing port\n")); 
+		close(fd_to_save_port);
+	}
 	const int num_of_connection = 4;
 	char *directory_name = args[2];
 	// make directories

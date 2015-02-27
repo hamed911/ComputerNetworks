@@ -31,6 +31,8 @@ struct linux_dirent {
 	char           d_name[];
 };
 
+vector<string> read_available_ports();
+int found_in(string str, vector<string> arr);
 vector<string> mytokenizer(string str, string delim);
 int clear_buff(char* c, int size);
 /*int strlength(char str[MAX_STR_SIZE]);
