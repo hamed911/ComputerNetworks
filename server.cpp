@@ -2,23 +2,30 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "utilities.h"
-
+#include "candidate.h"
 
 int main(int argn, char** args){
 
-	if (argn != 4){
-		char argErr[] = "Valid format is :\n./Company company_name stocks_num price\n";
+	if (argn != 2){
+		char argErr[] = "Valid format is :\n./server port_number\n";
 		write(STDOUTFD,argErr , strlen(argErr));
 		return 0;
 	}
+	int port = atoi(args[1]);
+	if( !writeLine("./DB/servers.txt",port) ){
+		cerr<<"error in saving port in server.txt"<<endl;
+		return 0;
+	}
+	
 	char sugst[] = "\nThese are the valid commands:\n\n";
 	char comm[][MAX_STR_SIZE] = 
 	{ "Connect\t\t->\tConnect to Server\n"
 		, "DC\t\t->\tDisconnect from the server\n"
-			, "Introduction\t->\tIntroduce new company to server\n"
-			, "Get Status\t->\tGets latest company status from server\n"
+			, "AddCandidate\t->\tadd new candidate to server\n"
+			, "ShowAllResult\t->\tshow the result of election\n"
+			, "SetVotingTime\t->\tset start and end of election\n"
+			, "ExtendVotingTime\t->\textend voting time\n"
 			, "Exit\t\t->\tExit the Program\n\n"};
-
 	write(STDOUTFD, sugst, sizeof(sugst));
 	int p;
 	for(p = 0; p < 5; p++)

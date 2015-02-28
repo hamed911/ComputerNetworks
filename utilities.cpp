@@ -22,6 +22,15 @@ int found_in(string str, vector<string> arr)
 	return -1;
 }
 
+bool writeLine(string fileName,int port){
+	ofstream file;
+	file.open(fileName.c_str(),ios::app|ios::out);
+	if(!file.is_open())
+		return false;
+	file << port << endl;
+	file.close();
+	return true;
+}
 /*int strlength(char str[MAX_STR_SIZE])
 {
 	int i;

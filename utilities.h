@@ -11,7 +11,8 @@
 #include <stdlib.h>
 #include <iostream>
 #include <vector>
- #include <arpa/inet.h>
+#include <arpa/inet.h>
+#include <fstream>
 
 #define STDINFD 0
 #define STDOUTFD 1
@@ -31,6 +32,7 @@ struct linux_dirent {
 	char           d_name[];
 };
 
+bool writeLine(string,int);
 vector<string> read_available_ports();
 int found_in(string str, vector<string> arr);
 vector<string> mytokenizer(string str, string delim);
