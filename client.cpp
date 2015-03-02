@@ -2,53 +2,42 @@
 #include <sys/socket.h>
 #include <netinet/in.h>
 #include "utilities.h"
-
+#include "cryptogram.h"
 int main(int argn, char** args){
-
-	if(argn != 3){
-		char argErr[]  = "Valid format is:\n./client voter_name ssn\n";
+	bool isAdmin = false;
+	if(argn != 2){
+		char argErr[]  = "Valid format is:\n./client voter_name\n";
 		write(STDOUTFD, argErr, strlen(argErr));
 		return 0;
 	}
+	RSA* keypair = create_RSA_key();
 	//show CA available ports
-	write(STDOUTFD, "These are available port(s) to connect to CAs\n", sizeof("These are available port(s) to connect to CAs\n"));
+	cout<< "These are available port(s) to connect to CAs\n";
 	//read available ports
 	vector<string> avail_ports = read_available_ports();
 	for(int i=0; i<avail_ports.size(); i++)
 		cout<<avail_ports[i]<<endl;
 
-	char sugst[] = "\nThese are the valid commands:\n\n";
-	char comm[][MAX_STR_SIZE] = 
-	{ "Connect\t\t->\tConnect to Server\n"
-		, "DC\t\t->\tDisconnect from the server\n"
-			, "Introduction\t->\tIntroduce new customer to server\n"
-			, "Get Stocks List\t->\tgGets latest stocks list\n"
-			, "Buy\t\t->\tBuy stocks from a company\n"
-			, "Get Status\t->\tGets latest customer status from server\n"
-			, "Unregister\t->\tUnregister customer\n"
-			, "Exit\t\t->\tExit the Program\n\n"};
-	write(STDOUTFD, sugst, sizeof(sugst));
-	int p;
-	for(p = 0; p < 8; p++)
-		write(STDOUTFD, comm[p], sizeof(comm[p]));
+	showClientCommands();
 
-	//char input_buffer[MAX_STR_SIZE];
-	string input_buffer;
-	char* cstr = new char [input_buffer.length()+1];
-	strcpy(cstr, input_buffer.c_str());
-	//clear_buff(cstr, MAX_STR_SIZE);
-	getline(cin, input_buffer);
-	input_buffer += "\n";
-	while(read(STDINFD, cstr, MAX_STR_SIZE) > 0)
+	char input_buffer[MAX_STR_SIZE];
+	clear_buff(input_buffer, MAX_STR_SIZE);
+	while(read(STDINFD, input_buffer, MAX_STR_SIZE) > 0)
 	{			
 		//parsing input_buffer
 		int input_tokens_num;		
-		//char input_tokens[MAX_ARRAY_SIZE][MAX_STR_SIZE];
 		vector<string> input_tokens;
+		string ord(input_buffer);
 		input_tokens = mytokenizer(input_buffer, " ");
 		
 		if(input_tokens[0] == "Connect")// don't forget to check reconnect!!!!!!!!!!!!!!!!!!!!!!!!!
 		{
+			// if(!isAdmin){
+			// 	cout << "you must be admin to connect server" << endl;
+			// 	continue;
+			// }
+			if( checkClientCommandValidation(input_tokens,args[1]) )
+				continue;
 			int n, m;//return value of read/write calls
 			int fd = socket(AF_INET, SOCK_STREAM, IPPROTO_TCP);
 			int port_no = atoi(input_tokens[2].c_str());
@@ -67,12 +56,6 @@ int main(int argn, char** args){
 			else write(STDOUTFD, "connecting successful\n", sizeof("connecting successful\n"));
 
 			//sending identity to server			
-			char iden_buff[MAX_STR_SIZE];
-                        clear_buff(iden_buff, MAX_STR_SIZE);
-                        strcat(iden_buff, "voter ");
-                        strcat(iden_buff, args[1]);
-                        strcat(iden_buff, " \0");
-			
 			while(1)
 			{
 				//read command
@@ -80,7 +63,7 @@ int main(int argn, char** args){
 				clear_buff(in_buff, MAX_STR_SIZE);
 				int status = read(STDINFD, in_buff, MAX_STR_SIZE);
 				char request[MAX_STR_SIZE];
-				strcpy(request, iden_buff);
+				strcpy(request, in_buff);
 				strcat(request, in_buff);		
 
 				int tokens_num;
@@ -88,7 +71,7 @@ int main(int argn, char** args){
 				vector<string> temptkns = mytokenizer(in_buff, " \n");
 	
 				//send command for server
-				if(temptkns[0]!="DC" && temptkns[0]!="Exit")
+				if(temptkns[0]!="Disconnect" && temptkns[0]!="Exit")
 				{
 					int bytes_written = write(fd, request, strlen(request));
 					if(bytes_written < 0)
@@ -102,7 +85,7 @@ int main(int argn, char** args){
 					//show the response to client
 					write(STDOUTFD, res_buff, strlen(res_buff));
 				}
-				else if(temptkns[0] == "DC")
+				else if(temptkns[0] == "Disconnect")
 				{
 					int bytes_written = write(fd, "DC", strlen("DC"));
 					if(bytes_written < 0)
@@ -120,13 +103,17 @@ int main(int argn, char** args){
 			}
 			close(fd);
 		}
+		else if(input_tokens[0]=="Register"){
+			if( checkClientCommandValidation(input_tokens,args[1]) )
+				continue;
+		}
 		else if(input_tokens[0] == "Exit")
 		{
 			return 0;
 		}
-		else if(input_tokens[0]!="Connect" && input_tokens[0]!="Exit")
+		else if(input_tokens[0]!="Register" && input_tokens[0]!="Exit")
 		{
-			write(STDOUTFD, "You Should Connect to Server First!\n", sizeof("You Should Connect to Server First!\n"));
+			write(STDOUTFD, "You Should Register to Certificate authority First!\n", sizeof("You Should Register to Certificate authority First!\n"));
 		}
 	}
 

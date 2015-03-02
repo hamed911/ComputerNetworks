@@ -56,7 +56,7 @@ int process_server_comm(vector<string> tokens, int num_of_tokens, char res[MAX_S
 {
 	return 0;
 }
-/*int process_command(char command[MAX_STR_SIZE], char res[MAX_STR_SIZE], char* dirnm)
+int process_command(char command[MAX_STR_SIZE], char res[MAX_STR_SIZE], char* dirnm)
 {
 	int num_of_tokens;
 	//char tokens[MAX_ARRAY_SIZE][MAX_STR_SIZE];
@@ -72,12 +72,12 @@ int process_server_comm(vector<string> tokens, int num_of_tokens, char res[MAX_S
 		return process_voter_comm(tokens, num_of_tokens, res, dirnm);
 	}
 	return -1;
-}*/
+}
 
-int process_command(char command[MAX_STR_SIZE], char res[MAX_STR_SIZE], char* dirnm)
+/*int process_command(char command[MAX_STR_SIZE], char res[MAX_STR_SIZE], char* dirnm)
 {
 	return 0;
-}
+}*/
 
 int main(int argn, char** args)
 {

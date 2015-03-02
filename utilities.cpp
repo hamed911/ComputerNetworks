@@ -21,6 +21,47 @@ int found_in(string str, vector<string> arr)
 	}
 	return -1;
 }
+bool checkClientCommandValidation(vector<string> args,char* name){
+	if(args.size()<=0)
+		return false;
+	if(args[0]=="Connect"){
+		if(args.size()!=4){
+			cout <<"insufficient number of argument!\tcorrect form=>\tConnect Server 2000 " << name << endl;
+			return false;
+		}
+		else
+			return true;
+	}else if(args[0]=="Register"){
+		if(args.size()!=5){
+			cout <<"insufficient number of argument!\tcorrect form=>\tRegister 123456789 " << name << " ***** *****" << endl;
+			return false;
+		}else{
+			if(args[3]!=args[4]){
+				cout << "Passwords are not the same!" << endl;
+				return false;
+			}
+		}
+		
+	}
+	return true;
+}
+void showClientCommands(){
+	cout<<"\nThese are the valid commands:\n\n";
+	char comm[][MAX_STR_SIZE] = 
+	{ "Connect\t\t->\tConnect voter to Server\n"
+		, "Disconnect\t\t->\tDisconnect from the server by admin\n"
+			, "Register\t->\tRegister yourself to certificate authority\n"
+			, "Get Stocks List\t->\tgGets latest stocks list\n"
+			, "Vote\t\t->\tVote to specific candidate\n"
+			, "ShowCandidates\t->\tShow all the available candidates\n"
+			, "SetVotingTime\t->\tset voting time\n"
+			, "ExtendVotingTime\t->\textendVotingTime\n"
+			, "ShowServers\t->\tShow server port\n"
+			, "ShowCA\t->\tShow CA's port\n"
+			, "Exit\t\t->\tExit the Program\n\n"};
+	for(int p = 0; p < 8; p++)
+		cout<< comm[p];
+}
 
 bool writeLine(string fileName,int port){
 	ofstream file;
