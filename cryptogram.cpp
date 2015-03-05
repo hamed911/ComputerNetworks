@@ -64,8 +64,50 @@ bool create_RSA_key(char *pubAddr,char *privAddr)
     RSA_free(r);                                                                                                
     BN_free(bne);                                                                                              
     return retVal;  
-} 
+}
 
+RSA *getPrivateKey(char *privAddr){
+    BIO             *bp_private = NULL;
+    bp_private = BIO_new_file(privAddr, "r");
+    RSA *rsa_privatekey = PEM_read_bio_RSAPrivateKey(bp_private, NULL, 0, NULL);
+    BIO_free(bp_private);
+    return rsa_privatekey;
+}
+
+
+void show_encrypted_massage(char* key,vector<string> com){
+    string command="";
+    for(int i=0;i<com.size(); i++)
+        command+=com[i]+" ";
+    cout << "encrypted massage is: "<< command << endl;
+}
+
+RSA *getPublicKey(char *pubAddr){
+    BIO             *bp_public = NULL;
+    bp_public = BIO_new_file(pubAddr, "r");
+    RSA *rsa_publickey = PEM_read_bio_RSAPublicKey(bp_public, NULL, 0, NULL);
+    BIO_free(bp_public);
+    return rsa_publickey;
+}
+int private_encrypt(unsigned char * data,int data_len ,char * privateAddr,unsigned char *encrypted)
+{
+    RSA * rsa = getPrivateKey(privateAddr);
+    int result = RSA_private_encrypt(data_len,data,encrypted,rsa,RSA_PKCS1_PADDING);
+    return result;
+}
+
+bool certificate_is_valid(char*buff_read){
+    vector<string> rcommand = mytokenizer(buff_read," ");
+    string t = "./DB/certificate/" +rcommand[1];
+    return file_exist(t.c_str());
+}
+
+int public_decrypt(unsigned char * enc_data,int data_len,char *publicAddr,unsigned char *decrypted)
+{
+    RSA * rsa = getPublicKey(publicAddr);
+    int  result = RSA_public_decrypt(data_len,enc_data,decrypted,rsa,RSA_PKCS1_PADDING);
+    return result;
+}
 
 int convert_size_t_to_int( size_t what )
 {
@@ -74,6 +116,40 @@ int convert_size_t_to_int( size_t what )
     }
     return static_cast<int>( what );
 }
+
+bool create_certificate(char* privatePath,string ssn,string name){
+    //string pub_voter_dir = "./DB/public/"+ssn;
+    char voter_dir_char[MAX_STR_SIZE];
+    clear_buff(voter_dir_char, MAX_STR_SIZE);
+    strcat(voter_dir_char,"./DB/public/" );
+    strcat(voter_dir_char, ssn.c_str());
+//    RSA* key_voter = getPublicKey(voter_dir_char);
+    RSA* key_CA = getPrivateKey(privatePath);
+    int* public_length = new int(0);
+  //  char* vote_public_key = get_public_key(key_voter,public_length);
+    int* encrypt_len = new int(0);
+    char voter_name[MAX_STR_SIZE];
+    clear_buff(voter_name, MAX_STR_SIZE);
+    strcat(voter_name, name.c_str());
+    char* encrypted = encrypt_massage_with_private_key(key_CA,voter_name , encrypt_len);
+    if(encrypted==NULL){
+        cout << "error in encrypting voter public key!" << endl;
+        return false;
+    }
+    clear_buff(voter_dir_char, MAX_STR_SIZE);
+    strcat(voter_dir_char,"./DB/certificate/" );
+    strcat(voter_dir_char, ssn.c_str());
+    ofstream file (voter_dir_char);
+    if(file.is_open()){
+        file << encrypted;
+        file.close();
+        cout << "certificate create successfully!" << endl;
+        return true;
+    }
+    cout<<"error in creating certificate" << endl;
+    return false;
+}
+
 /*
 int public_key_decrypt(unsigned char * enc_data,int data_len,unsigned char * key, unsigned char *decrypted)
 {

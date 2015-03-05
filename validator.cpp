@@ -7,8 +7,7 @@
 #include "utilities.h"
 #include "cryptogram.h"
 
-int process_voter_comm(vector<string> tokens, int num_of_tokens, char res[MAX_STR_SIZE], char* dirnm)
-{
+/*{
 	return 0;
 }
 int process_server_comm(vector<string> tokens, int num_of_tokens, char res[MAX_STR_SIZE], char* dirnm)
@@ -32,7 +31,7 @@ int process_command(char command[MAX_STR_SIZE], char res[MAX_STR_SIZE], char* di
 		return process_voter_comm(tokens, num_of_tokens, res, dirnm);
 	}
 	return -1;
-}
+}*/
 
 /*int process_command(char command[MAX_STR_SIZE], char res[MAX_STR_SIZE], char* dirnm)
 {
@@ -82,6 +81,7 @@ int main(int argn, char** args)
 	if(binding_st == -1)
 	{
 		write(STDOUTFD, "binding error\n", sizeof("binding error\n"));
+		return -1;
 		//exit
 	}
 	else 	
@@ -102,6 +102,25 @@ int main(int argn, char** args)
 	FD_ZERO(&read_fdset);
 	FD_SET(server_fd, &read_fdset);
 	FD_SET(STDINFD, &read_fdset);
+
+	char publicPath[MAX_STR_SIZE];
+	clear_buff(publicPath,MAX_STR_SIZE);
+	char privatePath[MAX_STR_SIZE];
+	clear_buff(privatePath,MAX_STR_SIZE);						
+	strcat( publicPath,"./DB/");
+	strcat( privatePath,"./DB/");
+	struct stat st;
+	if (stat(publicPath, &st) == -1) {
+	    mkdir(publicPath, 0700);
+	}
+	strcat( publicPath,"publicCA");
+	strcat( privatePath,"privateCA");
+	if( !create_RSA_key(publicPath,privatePath)) {
+		cout<<"error in creating key" << endl;
+	}else{
+		cout << "key create successfully! " << endl;
+	}
+
 
 	/* Wait up to five seconds. */
 	tv.tv_sec = 10 * 60;
@@ -171,17 +190,17 @@ int main(int argn, char** args)
 						if(buff_read != "DC")
 						{
 							if( strncmp (buff_read,"Register",8)==0 ){
-								char publicPath[MAX_STR_SIZE];
-								clear_buff(publicPath,MAX_STR_SIZE);						
-								strcat( publicPath,"./DB/");
-								struct stat st;
-								if (stat(publicPath, &st) == -1) {
-								    mkdir(publicPath, 0700);
-								}
-								strcat( publicPath,"certificate/");
-								if (stat(publicPath, &st) == -1) {
-								    mkdir(publicPath, 0700);
-								}
+								// char publicPath[MAX_STR_SIZE];
+								// clear_buff(publicPath,MAX_STR_SIZE);						
+								// strcat( publicPath,"./DB/");
+								// struct stat st;
+								// if (stat(publicPath, &st) == -1) {
+								//     mkdir(publicPath, 0700);
+								// }
+								// strcat( publicPath,"certificate/");
+								// if (stat(publicPath, &st) == -1) {
+								//     mkdir(publicPath, 0700);
+								// }
 								vector<string> rcommand = mytokenizer(buff_read," ");
 								////open file
 								string s = "./DB/certificate/"+ rcommand[1];
@@ -189,13 +208,26 @@ int main(int argn, char** args)
 								if(fd_c > 0){
 									chmod(s.c_str(),S_IRUSR | S_IWUSR);
 								}
-								for(int i=0; i< rcommand.size(); i++)
-									cerr << rcommand[i]  << ' ';
-								cerr << endl;
+								close(fd_c);
+								show_encrypted_massage(publicPath,rcommand);
+
+								if( create_certificate(privatePath,rcommand[2],rcommand[1]))
+								{
+									int s = write(it_fd, "certificate created successfully\n", strlen("certificate created successfully\n"));
+									if(s < 0) write(STDOUTFD, "Error on writing\n", sizeof("Error on writing\n"));
+								}else{
+									int s = write(it_fd, "error in creating certificate\n", strlen("error in creating certificate\n"));
+									if(s < 0) write(STDOUTFD, "Error on writing\n", sizeof("Error on writing\n"));
+								}
+								//open file
+
+								// for(int i=0; i< rcommand.size(); i++)
+								// 	cerr << rcommand[i]  << ' ';
+								// cerr << endl;
 								//open file
 
 							}
-							int s = write(it_fd, "ok", strlen("ok"));
+							int s = write(it_fd, "OK\n", strlen("OK\n"));
 							if(s < 0) write(STDOUTFD, "Error on writing\n", sizeof("Error on writing\n"));
 						}
 						else //if(buff_read == "DC")

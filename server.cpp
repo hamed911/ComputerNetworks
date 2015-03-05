@@ -3,11 +3,74 @@
 #include <netinet/in.h>
 #include "utilities.h"
 #include "candidate.h"
+#include "cryptogram.h"
 
-struct my_time {
-	int min;
-	int hour;
-};
+
+struct my_time start_time,stop_time;
+
+int process_command(char command[MAX_STR_SIZE], int cfd)
+{
+	int num_of_tokens;
+	//char tokens[MAX_ARRAY_SIZE][MAX_STR_SIZE];
+	vector<string> tokens = mytokenizer(command, " \n");
+	cerr<<tokens[0]<<"DDDDDDDDDDDDDDDDDDD"<<endl;
+	//if(num_of_tokens < 0)
+		//return -1;
+	char result[MAX_STR_SIZE];
+	clear_buff(result, MAX_STR_SIZE);
+	if(tokens[0] == "Show" && strncmp(tokens[1].c_str(),"Candidates", 10)==0)
+	{
+		if (tokens.size()!=2)
+		{
+			//cout <<"incorrect number of argument!\tcorrect form=>\tShow Candidates" << endl;
+cerr<<"\n\n inja gir mide \n"<<command<<" is incorrect show candidates\n\n"<<endl;
+			
+			return write(cfd, "incorrect number of argument!\tcorrect form=>\tShow Candidates\n", sizeof("incorrect number of argument!\tcorrect form=>\tShow Candidates\n"));
+		}
+		if(strncmp(tokens[1].c_str(), "Candidates", 10)!=0)
+		{
+			//cout <<"incorrect form \tcorrect form=>\tShow Candidates" << endl;
+			return write(cfd, "incorrect form \tcorrect form=>\tShow Candidates\n", sizeof("incorrect form \tcorrect form=>\tShow Candidates\n"));
+		}
+		cerr<<"FAHMIDE client E"<<endl;
+		show_candidates_name(result);
+		return write(cfd, result, sizeof(result));
+		//return process_server_comm(tokens, num_of_tokens, res, cfd);
+	}
+	else if(tokens[0] == "Vote")
+	{
+		if(certificate_is_valid(command))
+		{
+			//write(cfd, "you has certificated successfully\n", strlen("you has certificated successfully\n"));
+			if(voting(tokens)>0)
+			{
+				if(in_time(start_time,stop_time))
+				{
+					int fd_to_save_uname = open("./DB/voters.txt", O_APPEND | O_RDWR);
+					//cerr<<"uname is: "<<uname<< " in " <<uname.length()<<endl;
+					char* cstr = new char [tokens[1].length()+1];
+					strcpy(cstr, tokens[1].c_str());
+					int dumm = write(fd_to_save_uname, cstr, strlen(cstr));
+					dumm = write(fd_to_save_uname, "\n", strlen("\n"));
+					if(dumm <0)
+					write(STDOUTFD, "Error while writing port\n", sizeof("Error while writing port\n")); 
+					close(fd_to_save_uname);
+	
+					return write(cfd, "your vote has saved\n", sizeof("your vote has saved\n"));
+				}
+				else
+					return write(cfd, "Voting time is expired\n", sizeof("your vote has saved\n"));
+			}
+			else
+				return write(cfd, "your vote hasn't saved\n", sizeof("your vote hasn't saved\n"));
+			 
+		}else{
+			return write(cfd, "you must certificate first\n", strlen("you must certificate first\n"));
+		}
+			
+	}
+	return -1;
+}
 
 void show_results(){
 		int fd, nread;
@@ -58,7 +121,7 @@ void show_results(){
 vector<int> convert_string_to_time(string t){
 	cerr << "in convert time ..." << endl;
 	vector<int> result;
-	vector<string> r_string = mytokenizer(t,":");
+	vector<string> r_string = mytokenizer(t,":\n");
 	if(r_string.size()==2){
 		for(int i=0; i<2 ; i++){
 			result.push_back( atoi(r_string[i].c_str()) );
@@ -105,7 +168,7 @@ bool process_server_command(vector<string> args)
 			}
 		}
 	}else if(args[0]=="Extend"){
-		if(args.size()!=3){
+		if(args.size()!=4){
 			cout <<"insufficient number of argument!\tcorrect form=>\t‫‪Extend‬‬ ‫‪Voting‬‬ ‫‪Time‬‬ ‫‪23:00‬‬" << endl;
 			return false;
 		}else{
@@ -126,7 +189,7 @@ bool process_server_command(vector<string> args)
 }
 
 int main(int argn, char** args){
-	struct my_time start_time,stop_time;
+	//struct my_time start_time,stop_time;
 	if (argn != 2){
 		cout<<"Valid format is :\n./server server_port"<<endl;
 		return 0;
@@ -156,6 +219,7 @@ int main(int argn, char** args){
 			if(status < 0)
 			{
 				write(STDOUTFD,"Error on connecting\n", sizeof("Error on connecting\n"));
+				clear_buff(input_buffer, MAX_STR_SIZE);
 				continue;
 				//exit
 			}
@@ -260,6 +324,7 @@ int main(int argn, char** args){
 	if(binding_st == -1)
 	{
 		write(STDOUTFD, "binding error\n", sizeof("binding error\n"));
+		return -1;
 		//exit
 	}
 	else 	
@@ -314,10 +379,15 @@ int main(int argn, char** args){
 					}
 					vector <string> args = mytokenizer(buff_read," \n");
 					if( !process_server_command(args) )
+					{
+						clear_buff(buff_read, MAX_STR_SIZE);
 						continue;
+					}
 					if(args[0]=="Add"){
 						Candidate* temp_cand = new Candidate(args[1],atoi(args[2].c_str()));
 						temp_cand->saveCandidate();
+						clear_buff(buff_read, MAX_STR_SIZE);
+						continue;
 					}else if(args[0]=="Set"){
 						vector<int> st = convert_string_to_time(args[3]);
 						start_time.hour = st[0];
@@ -327,16 +397,24 @@ int main(int argn, char** args){
 						stop_time.min=st[1];
 						cout << "start time is: " <<start_time.hour << ":" << start_time.min << 
 							" and stop time is: " << stop_time.hour << ":" << stop_time.min << endl;
+							clear_buff(buff_read, MAX_STR_SIZE);
+							continue;
 					}else if (args[0]=="Extend"){
 						vector<int> st = convert_string_to_time(args[3]);
 						stop_time.hour = st[0];
 						stop_time.min = st[1];
 						cout << "stop time extends till: " <<stop_time.hour << ":" << stop_time.min << endl;
+						clear_buff(buff_read, MAX_STR_SIZE);
+						continue;
 					}
 					else if(args[0]=="Show"){
 						show_results();
+						continue;
 					}else
+					{
 						cout << "wrong input command" << endl;
+						continue;
+					}
 				}
 				if(it_fd == server_fd)
 				{	
@@ -374,16 +452,14 @@ int main(int argn, char** args){
 						{
 							cerr<<"Varede dasture GHEIRE DC shode ~"<<endl;
 							cerr<<"command is: "<<buff_read<<endl;
-							/*if(process_voter_command(buff_read, response_buff, directory_name) < 0)
+							if(process_command(buff_read, it_fd) < 0)
 							{
 								int st = write(it_fd, "Invalid command\n", sizeof("Invalid command\n"));
 								if(st < 0) 
 									write(STDOUTFD, "Error on writing\n", sizeof("Error on writing\n"));
 								continue;
-							}*/
-							//int s = write(it_fd, response_buff, strlen(response_buff));
-							int s = write(it_fd, "ok", strlen("ok"));
-							if(s < 0) write(STDOUTFD, "Error on writing\n", sizeof("Error on writing\n"));
+							}
+							//if(s < 0) write(STDOUTFD, "Error on writing\n", sizeof("Error on writing\n"));
 						}
 						else //if(buff_read == "DC")
 						{

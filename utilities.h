@@ -13,6 +13,10 @@
 #include <vector>
 #include <arpa/inet.h>
 #include <fstream>
+#include <sys/types.h>
+#include <dirent.h>
+#include <errno.h>
+#include <sstream>  
 
 #define STDINFD 0
 #define STDOUTFD 1
@@ -32,6 +36,12 @@ struct linux_dirent {
 	char           d_name[];
 };
 
+
+struct my_time {
+	int min;
+	int hour;
+};
+
 int create_directories(char path_name[MAX_STR_SIZE]);
 vector<string> read_available_ca_ports();
 vector<string> read_available_srvr_ports();
@@ -48,5 +58,11 @@ bool checkClientCommandValidation(vector<string> args);
 void show_server_commands();
 int numDigits(int );
 vector<string> mytokenizer_char(char* ,string );
+int show_candidates_name(char res[MAX_STR_SIZE]);
+vector<string> read_available_unames();
+int save_vote_comm(string uname);
+int voting(vector<string> v);
+bool in_time(my_time start_time, my_time stop_time);
+bool file_exist(const char *name);
 
 #endif

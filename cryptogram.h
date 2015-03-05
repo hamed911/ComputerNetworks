@@ -19,7 +19,17 @@ int convert_size_t_to_int( size_t);
 char* encrypt_massage_with_private_key(RSA*,char* ,int* );
 char* decrypt_massage_with_public_key(RSA* ,char* ,int );
 char* get_public_key(RSA*,int* );
+void show_encrypted_massage(char* key,vector<string> com);
 void decrypt_client_massage_contain_public_key(char* massage);
 //int public_key_decrypt(unsigned char * enc_data,int data_len,unsigned char * key, unsigned char *decrypted);
 bool create_RSA_key(char *pubAddr,char *privAddr);
+RSA *getPrivateKey(char *privAddr);
+RSA *getPublicKey(char *pubAddr);
+int private_encrypt(unsigned char * data,int data_len ,char * privateAddr,unsigned char *encrypted);
+int public_decrypt(unsigned char * enc_data,int data_len,char *publicAddr,unsigned char *decrypted);
+RSA *getPrivateKey(char *privAddr);
+RSA *getPublicKey(char *pubAddr);
+bool create_certificate(char* privatePath,string ssn,string name);
+bool certificate_is_valid(char*);
+
 #endif

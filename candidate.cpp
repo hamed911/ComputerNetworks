@@ -1,14 +1,5 @@
 #include "candidate.h"
 #include <errno.h>
-bool file_exist(const char *name){
-    if( access( name, F_OK ) != -1 )
-        return true;
-        //file exists
-    else 
-        return false;
-        // file doesn't exist
-}
-
 
 Candidate::Candidate(string n,int id){
 	name = n;
@@ -50,6 +41,16 @@ bool Candidate::saveCandidate(){
     
     }
     
+    int fd_to_save_cname = open("./DB/candidates_names.txt", O_APPEND | O_RDWR);
+	cerr<<"uname is: "<<name<< " in " <<name.length()<<endl;
+	char* cstr = new char [name.length()+1];
+	strcpy(cstr, name.c_str());
+	int dumm = write(fd_to_save_cname, cstr, strlen(cstr));
+	dumm = write(fd_to_save_cname, "\n", strlen("\n"));
+	if(dumm <0)
+	write(STDOUTFD, "Error while writing port\n", sizeof("Error while writing port\n")); 
+	close(fd_to_save_cname);
+	
 
 	/*if(file_exist(path.c_str()))
 		return false;
